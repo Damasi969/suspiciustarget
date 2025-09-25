@@ -59,7 +59,7 @@ export const LeafletMap = forwardRef<LeafletMapRef, LeafletMapProps>(({
   const leafletMapRef = useRef<L.Map | null>(null);
   const markersRef = useRef<Map<string, L.Marker>>(new Map());
   const tracksRef = useRef<Map<string, L.Polyline[]>>(new Map());
-  const sarPolygonsRef = useRef<Map<string, L.Polygon>>(new Map());
+  const sarLinesRef = useRef<Map<string, L.Polyline>>(new Map());
   const [contextMenu, setContextMenu] = useState<{
     type: 'waypoint' | 'target' | 'empty';
     item?: Waypoint | Target;
@@ -429,27 +429,35 @@ export const LeafletMap = forwardRef<LeafletMapRef, LeafletMapProps>(({
 
     // Gestisci visibilità layer
     Object.entries(sarLayers).forEach(([layerName, isEnabled]) => {
-      const existingPolygon = sarPolygonsRef.current.get(layerName);
+      const existingLine = sarLinesRef.current.get(layerName);
 
-      if (isEnabled && !existingPolygon && layerPolygons[layerName].length > 0) {
-        // Crea poligono se abilitato e ha coordinate
-        const coordinates = layerPolygons[layerName].map(coord => [coord.lat, coord.lng] as [number, number]);
+      if (isEnabled && !existingLine && layerPolygons[layerName].length > 0) {
+        // Crea polilinea se abilitato e ha coordinate
+        let coordinates = layerPolygons[layerName].map(coord => [coord.lat, coord.lng] as [number, number]);
         const color = layerColors[layerName] || '#666666';
         
-        const polygon = L.polygon(coordinates, {
+        // Per Malta SAR, crea polilinea chiusa senza colore di riempimento
+        if (layerName === 'Malta SAR') {
+          // Assicurati che la polilinea sia chiusa aggiungendo il primo punto alla fine se necessario
+          const firstPoint = coordinates[0];
+          const lastPoint = coordinates[coordinates.length - 1];
+          if (firstPoint[0] !== lastPoint[0] || firstPoint[1] !== lastPoint[1]) {
+            coordinates = [...coordinates, firstPoint];
+          }
+        }
+        
+        const polyline = L.polyline(coordinates, {
           color: color,
           weight: 2,
-          fillColor: color,
-          fillOpacity: 0.2,
           opacity: 0.8
         }).addTo(map);
 
-        // Aggiungi etichetta al centro del poligono
+        // Calcola il centro per l'etichetta usando la media delle coordinate
         if (coordinates.length > 0) {
-          const bounds = polygon.getBounds();
-          const center = bounds.getCenter();
+          const centerLat = coordinates.reduce((sum, coord) => sum + coord[0], 0) / coordinates.length;
+          const centerLng = coordinates.reduce((sum, coord) => sum + coord[1], 0) / coordinates.length;
           
-          L.marker([center.lat, center.lng], {
+          L.marker([centerLat, centerLng], {
             icon: L.divIcon({
               className: 'sar-label',
               html: `<div style="background: ${color}; color: white; padding: 2px 6px; border-radius: 3px; font-size: 12px; font-weight: bold; text-align: center; white-space: nowrap;">${layerName}</div>`,
@@ -459,11 +467,11 @@ export const LeafletMap = forwardRef<LeafletMapRef, LeafletMapProps>(({
           }).addTo(map);
         }
 
-        sarPolygonsRef.current.set(layerName, polygon);
-      } else if (!isEnabled && existingPolygon) {
-        // Rimuovi poligono se disabilitato
-        map.removeLayer(existingPolygon);
-        sarPolygonsRef.current.delete(layerName);
+        sarLinesRef.current.set(layerName, polyline);
+      } else if (!isEnabled && existingLine) {
+        // Rimuovi polilinea se disabilitato
+        map.removeLayer(existingLine);
+        sarLinesRef.current.delete(layerName);
         
         // Rimuovi anche l'etichetta
         map.eachLayer((layer) => {
