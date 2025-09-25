@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sistema di Navigazione Nautica - Versione Standalone</title>
+    <meta name="description" content="Applicazione nautica offline per la gestione di waypoint, target virtuali, tracce e misurazione di rotte su mappe nautiche" />
+    
+    <!-- Service Worker for local file handling -->
+    <script>
+        // Register service worker to handle local file requests
+        if ('serviceWorker' in navigator && window.location.protocol !== 'file:') {
+            navigator.serviceWorker.register('./local-server-sw.js').then(function(registration) {
+                console.log('Service Worker registered successfully:', registration.scope);
+            }).catch(function(error) {
+                console.log('Service Worker registration failed:', error);
+            });
+        } else if (window.location.protocol === 'file:') {
+            console.log('Service Worker not available in file:// protocol - application will work without it');
+        }
+    </script>
+    
+    <!-- Inline CSS and JS will be inserted here during build -->
+    <style>
+/* CSS will be inserted here */
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    
+    <!-- Embedded HTTP Server using Web APIs -->
+    <script>
+        // Create a mini HTTP server using Service Worker
+        class LocalServer {
+            constructor() {
+                this.init();
+            }
+            
+            async init() {
+                // Initialize local server functionality
+                if ('serviceWorker' in navigator && window.location.protocol !== 'file:') {
+                    try {
+                        const registration = await navigator.serviceWorker.register('./local-server-sw.js');
+                        console.log('Local server initialized');
+                        
+                        // Start the application
+                        this.startApp();
+                    } catch (error) {
+                        console.error('Failed to initialize local server:', error);
+                        // Fallback to direct file access
+                        this.startApp();
+                    }
+                } else {
+                    console.log('Running in file:// mode or ServiceWorker not supported - using fallback mode');
+                    this.startApp();
+                }
+            }
+            
+            startApp() {
+                // Application will be loaded here
+                console.log('Starting Nautical Application...');
+                
+                // Override fetch for local resources
+                const originalFetch = window.fetch;
+                window.fetch = function(resource, options) {
+                    // Handle local chart requests
+                    if (typeof resource === 'string' && resource.includes('/charts/')) {
+                        return new Promise((resolve) => {
+                            // Create a mock response for chart tiles
+                            const canvas = document.createElement('canvas');
+                            canvas.width = 256;
+                            canvas.height = 256;
+                            const ctx = canvas.getContext('2d');
+                            
+                            // Draw a simple nautical chart placeholder
+                            ctx.fillStyle = '#4A90E2';
+                            ctx.fillRect(0, 0, 256, 256);
+                            ctx.fillStyle = '#ffffff';
+                            ctx.font = '12px Arial';
+                            ctx.fillText('Chart Tile', 10, 20);
+                            const fileName = resource.split('/').pop();
+                            ctx.fillText(fileName || 'tile', 10, 40);
+                            
+                            canvas.toBlob((blob) => {
+                                resolve(new Response(blob, {
+                                    status: 200,
+                                    headers: { 'Content-Type': 'image/png' }
+                                }));
+                            });
+                        });
+                    }
+                    
+                    return originalFetch.apply(this, arguments);
+                };
+            }
+        }
+        
+        // Initialize local server
+        new LocalServer();
+    </script>
+    
+    <!-- Application JavaScript will be inserted here -->
+    <script>
+// React application code will be inserted here during build
+    </script>
+</body>
+</html>

@@ -1,0 +1,191 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Nautical Design System - Marine Navigation Colors and Effects */
+
+@layer base {
+  :root {
+    /* Ocean themed color palette */
+    --background: 210 30% 8%;
+    --foreground: 200 20% 95%;
+
+    --card: 215 25% 12%;
+    --card-foreground: 200 20% 95%;
+
+    --popover: 215 25% 12%;
+    --popover-foreground: 200 20% 95%;
+
+    /* Naval blue primary */
+    --primary: 210 100% 50%;
+    --primary-foreground: 210 30% 8%;
+
+    /* Deep sea secondary */
+    --secondary: 215 25% 18%;
+    --secondary-foreground: 200 20% 95%;
+
+    /* Ocean muted tones */
+    --muted: 215 25% 15%;
+    --muted-foreground: 200 15% 65%;
+
+    /* Marine accent */
+    --accent: 195 100% 45%;
+    --accent-foreground: 210 30% 8%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 200 20% 95%;
+
+    --border: 215 20% 20%;
+    --input: 215 25% 15%;
+    --ring: 210 100% 50%;
+
+    --radius: 0.75rem;
+
+    /* Custom nautical colors */
+    --navy-deep: 220 30% 12%;
+    --navy-medium: 215 25% 18%;
+    --ocean-blue: 210 100% 50%;
+    --ocean-light: 195 100% 45%;
+    --sea-foam: 180 50% 85%;
+    --wave-white: 200 30% 98%;
+
+    /* Gradients */
+    --gradient-ocean: linear-gradient(135deg, hsl(220 30% 12%), hsl(210 100% 50%));
+    --gradient-depth: linear-gradient(180deg, hsl(215 25% 18%), hsl(220 30% 12%));
+    --gradient-wave: linear-gradient(90deg, hsl(195 100% 45%), hsl(180 50% 85%));
+
+    /* Shadows and effects */
+    --shadow-deep: 0 10px 30px -10px hsl(220 30% 5% / 0.8);
+    --shadow-ocean: 0 0 40px hsl(210 100% 50% / 0.3);
+    --glow-radar: 0 0 20px hsl(195 100% 45% / 0.6);
+
+    /* Animations */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --pulse-duration: 2s;
+
+    --sidebar-background: 0 0% 98%;
+
+    --sidebar-foreground: 240 5.3% 26.1%;
+
+    --sidebar-primary: 240 5.9% 10%;
+
+    --sidebar-primary-foreground: 0 0% 98%;
+
+    --sidebar-accent: 240 4.8% 95.9%;
+
+    --sidebar-accent-foreground: 240 5.9% 10%;
+
+    --sidebar-border: 220 13% 91%;
+
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+
+  /* Light mode - Day navigation */
+  .light {
+    --background: 200 30% 98%;
+    --foreground: 220 30% 12%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 220 30% 12%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 30% 12%;
+
+    --primary: 210 100% 45%;
+    --primary-foreground: 200 30% 98%;
+
+    --secondary: 200 20% 92%;
+    --secondary-foreground: 220 30% 12%;
+
+    --muted: 200 20% 95%;
+    --muted-foreground: 215 15% 45%;
+
+    --accent: 195 100% 40%;
+    --accent-foreground: 200 30% 98%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 200 30% 98%;
+
+    --border: 200 20% 85%;
+    --input: 200 20% 95%;
+    --ring: 210 100% 45%;
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans;
+  }
+
+  /* Nautical animations */
+  @keyframes pulse-radar {
+    0%, 100% { 
+      opacity: 1;
+      transform: scale(1);
+    }
+    50% { 
+      opacity: 0.6;
+      transform: scale(1.05);
+    }
+  }
+
+  @keyframes wave-shimmer {
+    0% { 
+      background-position: -200% 0;
+    }
+    100% { 
+      background-position: 200% 0;
+    }
+  }
+
+  @keyframes float-target {
+    0%, 100% { 
+      transform: translateY(0px);
+    }
+    50% { 
+      transform: translateY(-3px);
+    }
+  }
+
+  .pulse-radar {
+    animation: pulse-radar var(--pulse-duration) ease-in-out infinite;
+  }
+
+  .wave-shimmer {
+    background: linear-gradient(
+      90deg,
+      transparent,
+      hsl(var(--ocean-light) / 0.3),
+      transparent
+    );
+    background-size: 200% 100%;
+    animation: wave-shimmer 2s linear infinite;
+  }
+
+  .float-target {
+    animation: float-target 3s ease-in-out infinite;
+  }
+
+  /* Leaflet map styling */
+  .leaflet-container {
+    background: hsl(var(--navy-deep));
+  }
+
+  .leaflet-control-container .leaflet-control {
+    background: hsl(var(--card));
+    border: 1px solid hsl(var(--border));
+    border-radius: var(--radius);
+  }
+}
